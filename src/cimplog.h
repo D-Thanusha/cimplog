@@ -18,10 +18,17 @@
 #define __CIMPLOG_H__
 
 #include <stdarg.h>
+#include <mosquitto.h>
+#include <mqtt_protocol.h>
 
 #define LEVEL_ERROR    0
 #define LEVEL_INFO     1
 #define LEVEL_DEBUG    2
+#define MQTT_CONFIG_FILE     "/home/infosys/Documents/conn_manager/.mqttconfig"
+#define MOSQ_TLS_VERSION     "tlsv1.2"
+#define KEEPALIVE            60
+#define MQTTCM_FREE(__x__) if(__x__ != NULL) { free((void*)(__x__)); __x__ = NULL;} else {printf("Trying to free null pointer\n");}
+typedef int (*disconnectCb)(int code);
 
 #define cimplog_error(module, ...)    __cimplog(module, LEVEL_ERROR, __VA_ARGS__)
 #define cimplog_info(module, ...)     __cimplog(module, LEVEL_INFO, __VA_ARGS__)
@@ -66,5 +73,7 @@ void __cimplog_generic(const char *module, const char *msg, ...);
 */
 void __cimplog_rdk_generic(const char *rdk_logger_module, const char *module, int level, const char *msg, ...);
 
-
+int RegisterCB(disconnectCb cb);
+int connectMqttBroker();
+void on_disconnect(struct mosquitto *mosq, void *obj, int reason_code, const mosquitto_property *props);
 #endif

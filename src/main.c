@@ -34,6 +34,5 @@ int main( int argc, char **argv)
         sprintf(msg, "%s\n", argv[1]);
         onboarding_log(NULL, msg);
     }
-
     return 0;
 }

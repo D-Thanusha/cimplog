@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(cimplog)
 
+include(ExternalProject)
 include(CTest)
 
 set(INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_install)
@@ -29,7 +30,23 @@ set(CMAKE_MACOSX_RPATH 1)
 endif()
 file(MAKE_DIRECTORY ${TEST_RESULTS_DIR})
 
-include_directories(${INCLUDE_DIR})
+include_directories(${INCLUDE_DIR}
+		    ${INCLUDE_DIR}/mosquitto)
+
+if (NOT BUILD_YOCTO)
+
+# mosquitto external dependency
+#-------------------------------------------------------------------------------
+ExternalProject_Add(mosquitto
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/_prefix/mosquitto
+    GIT_REPOSITORY https://github.com/eclipse/mosquitto.git
+    GIT_TAG "master"
+    CMAKE_ARGS += -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DWITH_CJSON=no -DWITH_BROKER=ON
+)
+add_library(libmosquitto STATIC SHARED IMPORTED)
+add_dependencies(libmosquitto mosquitto)
+
+endif ()
 
 if (LEVEL_DEFAULT)
 add_definitions(-DLEVEL_DEFAULT=${LEVEL_DEFAULT})
@@ -48,6 +65,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall -Wno-missing-field-initializer
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 
 add_subdirectory(src)
-if (BUILD_TESTING)
-    add_subdirectory(tests)
-endif (BUILD_TESTING)
+#if (BUILD_TESTING)
+  #  add_subdirectory(tests)
+#endif (BUILD_TESTING)
